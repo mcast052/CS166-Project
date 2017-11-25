@@ -299,6 +299,23 @@ public class AirBooking{
 	
 	public static void AddPassenger(AirBooking esql){//1
 		//Add a new passenger to the database
+		try{
+			System.out.print("Enter your full name: ");
+			String name = in.ReadLine(); 
+			System.out.print("\tEnter your birth date: "); 
+			String birthDate = in.ReadLine(); 
+			System.out.print("\tEnter your passport number: ");
+			String passNum = in.ReadLine(); 
+			System.out.print("\tEnter the country you are from: "); 
+			String passCountry = in.ReadLine(); 
+			 
+			String query = "INSERT INTO Passenger (passNum, fullName, bdate, country) VALUES (";
+			query = query + passNum + ", " + name + ", " + birthDate + ", " + passCountry + ");"; 
+
+			esql.executeUpdate(query); 
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
 	}
 	
 	public static void BookFlight(AirBooking esql){//2
