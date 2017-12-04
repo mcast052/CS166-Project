@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.SimpleDateFormat; 
+import java.util.Date;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -299,14 +301,76 @@ public class AirBooking{
 	
 	public static void AddPassenger(AirBooking esql){//1
 		//Add a new passenger to the database
+		try{
+			String trigger_query0 = "DROP TRIGGER IF EXISTS pID_trigger ON Passenger;";
+			String trigger_query = "CREATE TRIGGER pID_trigger BEFORE INSERT ON Passenger FOR EACH ROW EXECUTE PROCEDURE next_id();"; 
+			esql.executeUpdate(trigger_query0); 
+			esql.executeUpdate(trigger_query); 
+			
+			System.out.print("\tEnter your full name: ");
+			String name = in.readLine(); 
+			System.out.print("\tEnter your birth date (mm/dd/yyyy) : "); 
+			String date = in.readLine(); 
+			System.out.print("\tEnter your passport number: ");
+			String passNum = in.readLine(); 
+			System.out.print("\tEnter the country you are from: "); 
+			String passCountry = in.readLine(); 
+			 
+			if(name != null && date != null && passNum != null && passCountry != null) { 
+				String query = "INSERT INTO Passenger (passNum, fullName, bdate, country) VALUES (";
+				query += "'" + passNum + "', '" + name + "', '" + date + "', '" + passCountry + "');"; 
+				System.out.println(query); 
+
+				esql.executeUpdate(query); 
+			}
+			else { 
+				System.out.print("\tCannot leave entries blank.\n"); 
+			}
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
 	}
 	
 	public static void BookFlight(AirBooking esql){//2
 		//Book Flight for an existing customer
+		try {
+			 
+		} catch (Exception e) { 
+			System.err.println(e.getMessage()); 
+		} 
 	}
 	
 	public static void TakeCustomerReview(AirBooking esql){//3
-		//Insert customer review into the ratings table
+		try {
+			System.out.print("\tEnter your full name: "); 
+			String name = in.readLine(); 
+			System.out.print("\tEnter the flight number: "); 
+			String flightNum = in.readLine(); 
+			System.out.print("\tEnter your rating score 1-5, where 1 is poor and 5 is excellent: "); 
+			int score = Integer.parseInt(in.readLine()); 
+			System.out.print("\tEnter a comment (optional): "); 
+			String comment = in.readLine(); 
+			
+			//Query to find pID 
+			String query0 = "SELECT pID FROM Passenger WHERE fullName = '"; 
+			query0 += name "';"; 
+			query0_result = executeQueryAndReturnResult(query0); 
+			passID = query0_result.get(0).get(0); 
+			
+			String query1 = "SELECT * FROM Booking WHERE flightNum = "; 
+			query1 += "'" + flightNum + "' AND pID = '" + passID + "';";
+			query1_result = executeQueryAndPrintResult(query1); 
+			if(query1_result == 0) { 
+				System.out.print("Could not find passenger for the specified flight"); 
+			} 
+			//Insert customer review into the ratings table
+			//String query = "INSERT INTO Ratings (
+		}
+		catch(Exception e) {
+			System.err.println(e.getMessage()); 
+		} 
+	
+		
 	}
 	
 	public static void InsertOrUpdateRouteForAirline(AirBooking esql){//4
