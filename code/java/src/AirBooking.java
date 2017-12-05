@@ -407,7 +407,7 @@ public class AirBooking{
 			if ( k > top_Dest.size() ) { 
 				for(int i = 0; i < top_Dest.size(); i++) { 
 					System.out.print(i+1); 
-					System.out.println(" " + top_Dest.get(i).get(0)); 
+					System.out.println(". " + top_Dest.get(i).get(0)); 
 				} 
 			}
 			else { 
@@ -427,6 +427,44 @@ public class AirBooking{
 	
 	public static void ListFlightFromOriginToDestinationInOrderOfDuration(AirBooking esql){//8
 		//List flight to destination in order of duration (i.e. Airline name, flightNum, origin, destination, duration, plane)
+		try { 
+			System.out.print("\tEnter the flight origin: "); 
+			String origin = in.readLine(); 
+			System.out.print("\tEnter the flight destination: "); 
+			String dest = in.readLine(); 
+			System.out.print("\tEnter the number of flights you would like to see: ");
+			int k = Integer.parseInt(in.readLine()); 
+			
+			String query = "SELECT A.name, F.flightNum, F.origin, F.destination, F.duration, F.plane FROM Airline A, FLight F WHERE F.airId = A.airID AND origin = '";
+			query += origin + "' AND destination = '" + dest + "' ORDER BY F.duration ASC"; 
+			
+			List<List<String>> flights = esql.executeQueryAndReturnResult(query); 
+			
+			if ( k > flights.size() ) { 
+				System.out.print("Airline \t Flight Number \t Origin \t Destination \t Duration \t Plane"); 
+				System.out.println();
+				for(int i = 0; i < flights.size(); i++) { 
+					for(int j = 0; j < flights.get(i).size(); j++) { 
+						System.out.print(flights.get(i).get(j));
+						System.out.print("\t");  
+					}
+					System.out.println();
+				} 
+			}
+			else { 
+				System.out.print("Airline \t Flight Number \t Origin \t Destination \t Duration \t Plane"); 
+				System.out.println();
+				for(int i = 0; i < k; i++) { 
+					for(int j = 0; j < flights.get(i).size(); j++) { 
+						System.out.print(flights.get(i).get(j));
+						//System.out.print("\t");  
+					}
+					System.out.println();
+				} 
+			}
+		} catch(Exception e) { 
+			System.err.println(e.getMessage()); 
+		}
 	}
 	
 	public static void FindNumberOfAvailableSeatsForFlight(AirBooking esql){//9
