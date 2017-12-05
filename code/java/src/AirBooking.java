@@ -397,6 +397,28 @@ public class AirBooking{
 	
 	public static void ListMostPopularDestinations(AirBooking esql){//6
 		//Print the k most popular destinations based on the number of flights offered to them (i.e. destination, choices)
+		try { 
+			System.out.print("\tEnter the number of destinations you would like to see: ");
+			int k = Integer.parseInt(in.readLine()); 
+			
+			String query = "SELECT destination, COUNT(*) FROM Flight GROUP BY destination ORDER BY COUNT(*) DESC;"; 
+			List<List<String>> top_Dest = esql.executeQueryAndReturnResult(query); 
+			
+			if ( k > top_Dest.size() ) { 
+				for(int i = 0; i < top_Dest.size(); i++) { 
+					System.out.print(i+1); 
+					System.out.println(" " + top_Dest.get(i).get(0)); 
+				} 
+			}
+			else { 
+				for(int i = 0; i < k; i++) { 
+					System.out.print(i+1); 
+					System.out.println(". " + top_Dest.get(i).get(0)); 
+				}
+			}
+		} catch(Exception e) { 
+			System.err.println(e.getMessage()); 
+		}
 	}
 	
 	public static void ListHighestRatedRoutes(AirBooking esql){//7
