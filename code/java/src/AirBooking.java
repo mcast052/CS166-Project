@@ -319,7 +319,7 @@ public class AirBooking{
 			if(name != null && date != null && passNum != null && passCountry != null) { 
 				String query = "INSERT INTO Passenger (passNum, fullName, bdate, country) VALUES (";
 				query += "'" + passNum + "', '" + name + "', '" + date + "', '" + passCountry + "');"; 
-				System.out.println(query); 
+				//System.out.println(query); 
 
 				esql.executeUpdate(query); 
 			}
@@ -342,32 +342,46 @@ public class AirBooking{
 	
 	public static void TakeCustomerReview(AirBooking esql){//3
 		try {
+			//Gets initial information from user for queries
 			System.out.print("\tEnter your full name: "); 
 			String name = in.readLine(); 
 			System.out.print("\tEnter the flight number: "); 
 			String flightNum = in.readLine(); 
+			
+			//Query to find pID 
+			String query0 = "SELECT pID FROM Passenger WHERE fullName = '"; 
+			query0 += name + "';"; 
+			List<List<String>> query0_result = esql.executeQueryAndReturnResult(query0); 
+			String passID = query0_result.get(0).get(0); 
+			System.out.print(passID); 
+			
+			//Query checks if passenger is in the booking table for that flight
+			String query1 = "SELECT * FROM Booking WHERE flightNum = "; 
+			query1 += "'" + flightNum + "' AND pID = '" + passID + "';";
+			System.out.print(query1); 
+			List<List<String>> query1_result = esql.executeQueryAndReturnResult(query1); 
+			
+			//If passenger exists, allow them to create a review
 			System.out.print("\tEnter your rating score 1-5, where 1 is poor and 5 is excellent: "); 
 			int score = Integer.parseInt(in.readLine()); 
 			System.out.print("\tEnter a comment (optional): "); 
 			String comment = in.readLine(); 
 			
-			//Query to find pID 
-			String query0 = "SELECT pID FROM Passenger WHERE fullName = '"; 
-			query0 += name "';"; 
-			query0_result = executeQueryAndReturnResult(query0); 
-			passID = query0_result.get(0).get(0); 
+			//Query that drops/creates trigger for rID
+			String drop_trigger = "DROP TRIGGER IF EXISTS rID_trigger ON Ratings;"; 
+			String review_trigger = "CREATE TRIGGER rID_trigger BEFORE INSERT ON Ratings FOR EACH ROW EXECUTE PROCEDURE next_rid();"; 
+			esql.executeUpdate(drop_trigger); 
+			esql.executeUpdate(review_trigger); 
 			
-			String query1 = "SELECT * FROM Booking WHERE flightNum = "; 
-			query1 += "'" + flightNum + "' AND pID = '" + passID + "';";
-			query1_result = executeQueryAndPrintResult(query1); 
-			if(query1_result == 0) { 
-				System.out.print("Could not find passenger for the specified flight"); 
-			} 
 			//Insert customer review into the ratings table
-			//String query = "INSERT INTO Ratings (
+			String insert_query = "INSERT INTO Ratings (pID, flightNum, score, comment) VALUES ('"; 
+			insert_query += passID + "', '" + flightNum + "', '" + score + "', '" + comment + "');"; 
+			System.out.print(insert_query); 
+			esql.executeUpdate(insert_query);  
 		}
 		catch(Exception e) {
 			System.err.println(e.getMessage()); 
+			//System.out.print("Could not find passenger for the specified flight\n"); 
 		} 
 	
 		
@@ -383,6 +397,28 @@ public class AirBooking{
 	
 	public static void ListMostPopularDestinations(AirBooking esql){//6
 		//Print the k most popular destinations based on the number of flights offered to them (i.e. destination, choices)
+		try { 
+			System.out.print("\tEnter the number of destinations you would like to see: ");
+			int k = Integer.parseInt(in.readLine()); 
+			
+			String query = "SELECT destination, COUNT(*) FROM Flight GROUP BY destination ORDER BY COUNT(*) DESC;"; 
+			List<List<String>> top_Dest = esql.executeQueryAndReturnResult(query); 
+			
+			if ( k > top_Dest.size() ) { 
+				for(int i = 0; i < top_Dest.size(); i++) { 
+					System.out.print(i+1); 
+					System.out.println(". " + top_Dest.get(i).get(0)); 
+				} 
+			}
+			else { 
+				for(int i = 0; i < k; i++) { 
+					System.out.print(i+1); 
+					System.out.println(". " + top_Dest.get(i).get(0)); 
+				}
+			}
+		} catch(Exception e) { 
+			System.err.println(e.getMessage()); 
+		}
 	}
 	
 	public static void ListHighestRatedRoutes(AirBooking esql){//7
@@ -391,6 +427,44 @@ public class AirBooking{
 	
 	public static void ListFlightFromOriginToDestinationInOrderOfDuration(AirBooking esql){//8
 		//List flight to destination in order of duration (i.e. Airline name, flightNum, origin, destination, duration, plane)
+		try { 
+			System.out.print("\tEnter the flight origin: "); 
+			String origin = in.readLine(); 
+			System.out.print("\tEnter the flight destination: "); 
+			String dest = in.readLine(); 
+			System.out.print("\tEnter the number of flights you would like to see: ");
+			int k = Integer.parseInt(in.readLine()); 
+			
+			String query = "SELECT A.name, F.flightNum, F.origin, F.destination, F.duration, F.plane FROM Airline A, FLight F WHERE F.airId = A.airID AND origin = '";
+			query += origin + "' AND destination = '" + dest + "' ORDER BY F.duration ASC"; 
+			
+			List<List<String>> flights = esql.executeQueryAndReturnResult(query); 
+			
+			if ( k > flights.size() ) { 
+				System.out.print("Airline \t Flight Number \t Origin \t Destination \t Duration \t Plane"); 
+				System.out.println();
+				for(int i = 0; i < flights.size(); i++) { 
+					for(int j = 0; j < flights.get(i).size(); j++) { 
+						System.out.print(flights.get(i).get(j));
+						System.out.print("\t");  
+					}
+					System.out.println();
+				} 
+			}
+			else { 
+				System.out.print("Airline \t Flight Number \t Origin \t Destination \t Duration \t Plane"); 
+				System.out.println();
+				for(int i = 0; i < k; i++) { 
+					for(int j = 0; j < flights.get(i).size(); j++) { 
+						System.out.print(flights.get(i).get(j));
+						//System.out.print("\t");  
+					}
+					System.out.println();
+				} 
+			}
+		} catch(Exception e) { 
+			System.err.println(e.getMessage()); 
+		}
 	}
 	
 	public static void FindNumberOfAvailableSeatsForFlight(AirBooking esql){//9
