@@ -334,10 +334,220 @@ public class AirBooking{
 	public static void BookFlight(AirBooking esql){//2
 		//Book Flight for an existing customer
 		try {
-			 
-		} catch (Exception e) { 
-			System.err.println(e.getMessage()); 
-		} 
+				String trigger_query0 = "DROP TRIGGER IF EXISTS bookRef_trigger ON Booking;";
+				String trigger_query = "CREATE TRIGGER bookRef_trigger BEFORE INSERT ON Booking FOR EACH ROW EXECUTE PROCEDURE next_bookRef();"; 
+				esql.executeUpdate(trigger_query0); 
+				esql.executeUpdate(trigger_query);
+				int exit = 0;
+				
+				System.out.print("\tEnter your full name: "); 
+				String name = in.readLine(); 
+				System.out.print("\tEnter your passport number: "); 
+				String pass = in.readLine(); 
+				
+				String query0 = "Select * From Passenger where fullname = '"; 
+				query0 += name;
+				query0 += "' AND passnum = '";
+				query0 += pass;
+				query0 += "';"; 
+				List<List<String>> q_result = esql.executeQueryAndReturnResult(query0); 
+				int query0_result = q_result.size();
+				
+				if(query0_result == 0)
+				{
+					while(query0_result == 0)
+					{
+						System.out.print("\tYou did not enter a valid fullname or passport#. Press 0 to try again or 1 to exit. "); 
+						String choice = in.readLine();
+						if(Integer.parseInt(choice) == 0)
+						{
+							System.out.print("\tEnter your full name: "); 
+							name = in.readLine(); 
+							System.out.print("\tEnter your passport number: "); 
+							pass = in.readLine(); 
+							
+							query0 = "Select * From Passenger where fullname = '"; 
+							query0 += name;
+							query0 += "' AND passnum = '";
+							query0 += pass;
+							query0 += "';"; 
+							q_result = esql.executeQueryAndReturnResult(query0); 
+							query0_result = q_result.size();
+						}
+						else if(Integer.parseInt(choice) == 1)
+						{
+							return;
+						}
+						else
+						{
+							System.out.println("\tYou did not enter a valid choice.");
+						}
+					}
+				}
+				
+				int pId = Integer.parseInt(q_result.get(0).get(0));
+				System.out.println("\tHi " +name+ "!");
+				System.out.print("\tEnter where you plan to fly from: "); 
+				String origin = in.readLine(); 
+				System.out.print("\tEnter where you plan to fly to: "); 
+				String destination = in.readLine(); 
+				
+				String query1 = "Select * From Flight Where origin = '" + origin + "' AND destination = '" + destination + "';"; 
+				List<List<String>> query1_result = esql.executeQueryAndReturnResult(query1); 
+				int flightCount = query1_result.size();
+				
+				while(flightCount == 0)
+				{
+					System.out.print("\tNo flights from " + origin + " to " + destination + " are available. Press 0 to try again and 1 to exit."); 
+					String choice = in.readLine();
+					if(Integer.parseInt(choice) == 0)
+					{
+						System.out.print("\tEnter where you plan to fly from: "); 
+						origin = in.readLine(); 
+						System.out.print("\tEnter where you plan to fly to: "); 
+						destination = in.readLine();
+						
+						query1 = "Select * From Flight Where origin = '"; 
+						query1 += origin;
+						query1 += "' AND destination = '";
+						query1 += destination;
+						query1 += "';"; 
+						query1_result = esql.executeQueryAndReturnResult(query1); 
+						flightCount = query1_result.size();
+					}
+					else if(Integer.parseInt(choice) == 1)
+					{
+						return;
+					}
+					else
+					{
+						System.out.println("\tYou did not enter a valid choice.");
+					}
+				}
+				
+				for(int i = 0; i < flightCount;i++)
+				{
+					String tuple = "\t(" + i + ") Flight Number: " + query1_result.get(i).get(1) + " Plane: " + query1_result.get(i).get(4) + " Seats: " + query1_result.get(i).get(5) + " Duration: " + query1_result.get(i).get(6);
+					System.out.println(tuple);
+				}
+				 
+				System.out.print("\tEnter the index, in the (), of the flight you would like to take. Enter -1 if you would like to exit. "); 
+				String choiceFlight = in.readLine();
+				
+				if(Integer.parseInt(choiceFlight) == -1)
+				{
+					return;
+				}
+				else
+				{
+					while(Integer.parseInt(choiceFlight) < 0 || Integer.parseInt(choiceFlight) >= flightCount)
+					{
+						System.out.println("\tYou did not enter a valid index."); 
+						System.out.print("\tEnter the index, in the (), of the flight you would like to take. Enter -1 if you would like to exit. "); 
+						choiceFlight = in.readLine();
+						if(Integer.parseInt(choiceFlight) == -1)
+						{
+							return;
+						}
+					}
+				}
+				
+				List<String> flightChosen = query1_result.get(Integer.parseInt(choiceFlight));
+				
+				System.out.print("\tEnter the year you would like to take the flight. (After 2016) ");
+				String year = in.readLine();
+				while(Integer.parseInt(year) <= 2016)
+				{
+					System.out.println("\tPlease enter a valid year.");
+					System.out.print("\tEnter the year you would like to take the flight. (After 2016 or -1 to exit) ");
+					year = in.readLine();
+					if(Integer.parseInt(year) == -1)
+					{
+						return;
+					}
+				}
+				System.out.print("\tEnter the month you would like to take the flight. (Between 1-12) ");
+				String month = in.readLine();
+				while(Integer.parseInt(month) < 1 || Integer.parseInt(month) > 12)
+				{
+					System.out.println("\tPlease enter a valid month.");
+					System.out.print("\tEnter the month you would like to take the flight. (Between 1-12 or -1 to exit) ");
+					month = in.readLine();
+					if(Integer.parseInt(month) == -1)
+					{
+						return;
+					}
+				}
+				System.out.print("\tEnter the day you would like to take the flight. (Between 1 - 31) ");
+				String day = in.readLine();
+				while(Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31)
+				{
+					System.out.println("\tPlease enter a valid day.");
+					System.out.print("\tEnter the day you would like to take the flight. (Between 1 - 31 or -1 to exit) ");
+					day = in.readLine();
+					if(Integer.parseInt(day) == -1)
+					{
+						return;
+					}
+				}
+				String date = year + "-" + month +"-" + day;
+				String query2=  "Select * From Booking B Where B.flightNum = '";
+				 query2 += flightChosen.get(1);
+				 query2 += "' AND B.departure = '";
+				 query2 += date;
+				 query2 += "';";
+				 List<List<String>> q_result2 = esql.executeQueryAndReturnResult(query2);
+				 int query_result2 = q_result2.size();
+				 int numSeats = Integer.parseInt(flightChosen.get(5));
+				 System.out.println("\tNum of seats left: " + (numSeats - query_result2));
+				 if(numSeats - query_result2 > 0)
+				 {
+					 System.out.print("\tGreat! It seems like that date works. Would you like to book this flight? (Yes or No) ");
+					 String bookChoice = in.readLine();
+					 if(bookChoice.equals("No"))
+					 {
+						 return;
+					 }
+					 while(!bookChoice.equals("Yes"))
+					 {
+						 System.out.println("\tPlease enter a valid input.");
+						 System.out.print("\tGreat! It seems like that date works. Would you like to book this flight? (Yes or No) ");
+						 bookChoice = in.readLine();
+						 if(bookChoice.equals("No"))
+						 {
+							 return;
+						 }
+					 }
+					 
+					 String query3=  "Select * From Booking B Where B.flightNum = '"+ flightChosen.get(1) + "' AND B.departure = '" + date + "' AND pId = '" +pId+ "';";
+					 List<List<String>> q_result3 = esql.executeQueryAndReturnResult(query3);
+					 int query_result3 = q_result3.size();
+					 if(query_result3 > 0)
+					 {
+						 System.out.println("\tSorry you already booked this same flight and departure time!"); 
+					 }
+					 else
+					 {
+						 String queryLast = "INSERT INTO Booking (departure, flightNum, pId) VALUES (";
+						 queryLast += "'" + date + "', '" + flightChosen.get(1) + "', '" + pId +"');"; 
+						 System.out.println("\tYour flight has been successfully booked!"); 
+
+						 esql.executeUpdate(queryLast);
+					 }
+				 }
+				 else
+				 {
+					 System.out.println("\tSorry! That flight is fully booked.");
+					 return;
+				 }
+				 
+				 
+	//Insert into âBookingâ Values ($departure,$flightNum,$pId) // the first value which is bookref auto increments
+
+			} catch (Exception e) { 
+				System.err.println(e.getMessage()); 
+			}
+
 	}
 	
 	public static void TakeCustomerReview(AirBooking esql){//3
@@ -393,6 +603,40 @@ public class AirBooking{
 	
 	public static void ListAvailableFlightsBetweenOriginAndDestination(AirBooking esql) throws Exception{//5
 		//List all flights between origin and distination (i.e. flightNum,origin,destination,plane,duration) 
+		try{
+			 System.out.print("\tEnter origin: ");
+			 String origin = in.readLine();
+			 System.out.print("\tEnter destination: ");
+			 String destination = in.readLine();
+			 String query =  "Select flightNum, origin,destination, plane,duration From Flight F Where F.destination = '";
+			 query += destination;
+			 query += "' AND F.origin = '";
+			 query += origin;
+			 query += "';";
+
+			 int rowCount = esql.executeQueryAndPrintResult(query);
+			 while(rowCount == 0)
+			 {
+				 System.out.print("\tThere are no flights from "+ origin +" to "+ destination +". Would you like to try again? (Yes or No) ");
+				 String response = in.readLine();
+				 if(response.equals("No"))
+				 {
+					 return;
+				 }
+				 System.out.print("\tEnter origin: ");
+				 origin = in.readLine();
+				 System.out.print("\tEnter destination: ");
+				 destination = in.readLine();
+				 query =  "Select flightNum, origin,destination, plane,duration From Flight F Where F.destination = '";
+				 query += destination;
+				 query += "' AND F.origin = '";
+				 query += origin;
+				 query += "';";
+				 rowCount = esql.executeQueryAndPrintResult(query);
+			 }
+		  }catch(Exception e){
+			 System.err.println (e.getMessage());
+		  }
 	}
 	
 	public static void ListMostPopularDestinations(AirBooking esql){//6
@@ -423,6 +667,22 @@ public class AirBooking{
 	
 	public static void ListHighestRatedRoutes(AirBooking esql){//7
 		//List the k highest rated Routes (i.e. Airline Name, flightNum, Avg_Score)
+		try{
+			 String query =  "Select origin, destination, AVG(SCORE) as Average_Score,F.flightNum From Ratings R, Flight F Where R.flightNum = F.flightNum Group By F.flightNum,r.rId Order By AVG(SCORE) DESC Limit ";
+			 System.out.print("\tEnter k: ");
+			 String input = in.readLine();
+			 query += input;
+			 query += ";";
+
+			 int rowCount = esql.executeQueryAndPrintResult(query);
+			 if(rowCount == 0)
+			 {
+				 System.out.println("\tThere are no reviews.");
+			 }
+		  }catch(Exception e){
+			 System.err.println (e.getMessage());
+		  }
+
 	}
 	
 	public static void ListFlightFromOriginToDestinationInOrderOfDuration(AirBooking esql){//8
@@ -469,7 +729,89 @@ public class AirBooking{
 	
 	public static void FindNumberOfAvailableSeatsForFlight(AirBooking esql){//9
 		//
-		
+		try{
+			 System.out.print("\tEnter Flight Number: ");
+			 String input = in.readLine();
+			 System.out.print("\tEnter the year of the flight you are looking for. (After 2016) ");
+				String year = in.readLine();
+				while(Integer.parseInt(year) <= 2016)
+				{
+					System.out.println("\tPlease enter a valid year.");
+					System.out.print("\tEnter the year of the flight you are looking for. (After 2016 or -1 to exit) ");
+					year = in.readLine();
+					if(Integer.parseInt(year) == -1)
+					{
+						return;
+					}
+				}
+				System.out.print("\tEnter the month of the flight you are looking for. (Between 1-12) ");
+				String month = in.readLine();
+				while(Integer.parseInt(month) < 1 || Integer.parseInt(month) > 12)
+				{
+					System.out.println("\tPlease enter a valid month.");
+					System.out.print("\tEnter the month of the flight you are looking for. (Between 1-12 or -1 to exit) ");
+					month = in.readLine();
+					if(Integer.parseInt(month) == -1)
+					{
+						return;
+					}
+				}
+				System.out.print("\tEnter the day of the flight you are looking for. (Between 1 - 31) ");
+				String day = in.readLine();
+				while(Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31)
+				{
+					System.out.println("\tPlease enter a valid day.");
+					System.out.print("\tEnter the day of the flight you are looking for. (Between 1 - 31 or -1 to exit) ");
+					day = in.readLine();
+					if(Integer.parseInt(day) == -1)
+					{
+						return;
+					}
+				}
+				String date = year + "-" + month +"-" + day;
+			 
+			 String query1=  "Select * From Flight F Where F.flightNum = '";
+			 query1 += input;
+			 query1 += "';";
+			 List<List<String>> str = esql.executeQueryAndReturnResult(query1);
+			 
+			 while(str.size() == 0)
+			 {
+				 System.out.print("\tSorry you did not enter a valid flight number. Type \"Exit\" if you would like the exit or type the flight number again. ");
+				 input= in.readLine();
+				 if(input.equals("Exit"))
+				 {
+					 return;
+				 }
+				 query1=  "Select * From Flight F Where F.flightNum = '";
+				 query1 += input;
+				 query1 += "';";
+				 str = esql.executeQueryAndReturnResult(query1);
+			 }
+			 
+			 String flightNum = str.get(0).get(1);
+			 flightNum.replaceAll("\\s+","");
+			 String origin = str.get(0).get(2);
+			 origin.replaceAll("\\s+","");
+			 String destination = str.get(0).get(3);
+			 int numSeats = Integer.parseInt(str.get(0).get(5));
+			 
+			 String query=  "Select * From Booking B Where B.flightNum = '";
+			 query += input;
+			 query += "' AND B.departure = '";
+			 query += date;
+			 query += "';";
+			 
+			 List<List<String>> rcList = esql.executeQueryAndReturnResult(query);
+			 esql.executeQueryAndPrintResult(query);
+			 int rowcount = rcList.size();
+			 
+			 int seatsAvailable = numSeats - rowcount;
+			 System.out.println("\tFor FlightNum: "+flightNum+", the origin is: " + origin +", the destination is: "+ destination +", the number of booked seats is: "+ rowcount
+			 + ", the number of total seats is: " + numSeats + ", and the number of seats available is: " + seatsAvailable);
+		  }catch(Exception e){
+			 System.err.println (e.getMessage());
+		  }
 	}
 	
 }

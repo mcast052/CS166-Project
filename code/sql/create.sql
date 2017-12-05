@@ -13,6 +13,7 @@ DROP DOMAIN IF EXISTS _SCORE CASCADE;
 -- CREATE SEQUENCES
 CREATE SEQUENCE pID_seq START WITH 250; 
 CREATE SEQUENCE rID_seq START WITH 433;  
+CREATE SEQUENCE bookRef_seq START WITH 10000;
 
 -- CREATE TRIGGERS
 CREATE LANGUAGE plpgsql; 
@@ -29,6 +30,14 @@ CREATE OR REPLACE FUNCTION next_rid()
 RETURNS "trigger" AS 
 	'BEGIN 
 	new.rID = nextval(''rID_seq''); 
+	Return new; 
+	END;'
+LANGUAGE 'plpgsql' VOLATILE; 
+
+CREATE OR REPLACE FUNCTION next_bookRef()
+RETURNS "trigger" AS 
+	'BEGIN 
+	new.bookRef = nextval(''bookRef_seq''); 
 	Return new; 
 	END;'
 LANGUAGE 'plpgsql' VOLATILE; 
