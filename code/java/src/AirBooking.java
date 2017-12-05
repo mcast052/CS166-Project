@@ -599,6 +599,208 @@ public class AirBooking{
 	
 	public static void InsertOrUpdateRouteForAirline(AirBooking esql){//4
 		//Insert a new route for the airline
+		try{
+			System.out.print("\tWould you like to insert (enter 1) or update(enter 2) a flight? (Press 0 to exit) ");
+			String choice = in.readLine();
+			if(Integer.parseInt(choice) == 0)
+			{
+				return;
+			}
+			while(Integer.parseInt(choice) != 1 && Integer.parseInt(choice) != 2)
+			{
+				System.out.println("\tPlease insert a valid choice.");
+				System.out.print("\tWould you like to insert (enter 1) or update (enter 2) a flight? (Press 0 to exit) ");
+				choice = in.readLine();
+				if(Integer.parseInt(choice) == 0)
+				{
+					return;
+				}
+			}
+			
+			if(Integer.parseInt(choice) == 1)
+			{
+				String query = "SELECT * FROM Airline;";
+				esql.executeQueryAndPrintResult(query);
+				System.out.print("\tGreat! Please select the airline from the list above using its airId. (Enter -1 to return to main menu) " );
+				String airId = in.readLine();
+				if(Integer.parseInt(airId) == -1)
+				{
+					return;
+				}
+				String query0 = "SELECT * FROM Airline WHERE airId = '"; 
+				query0 += airId + "';"; 
+				List<List<String>> query0_result = esql.executeQueryAndReturnResult(query0);
+				while(query0_result.size()== 0)
+				{
+					System.out.println("\tSorry, you entered an invalid airId." );
+					System.out.print("\tPlease select the airline from the list above using its airId. (Enter -1 to return to main menu) " );
+					airId = in.readLine();
+					if(Integer.parseInt(airId) == -1)
+					{
+						return;
+					}
+					query0 = "SELECT * FROM Airline WHERE airId = '"; 
+					query0 += airId + "';"; 
+					query0_result = esql.executeQueryAndReturnResult(query0);
+				}
+				//String query1 = "SELECT * FROM Flight Where airId='" + query0_result.get(0).get(0) + "';";
+				//esql.executeQueryAndPrintResult(query1);
+				System.out.print("\tEnter origin: ");
+				String origin = in.readLine();
+				System.out.print("\tEnter destination: ");
+				String destination = in.readLine();
+				System.out.print("\tEnter plane: ");
+				String plane = in.readLine();
+				//String query1 = "Select * FROM Flight Where Plane = '" + plane + "';";
+				//List<List<String>> query1_result = esql.executeQueryAndReturnResult(query1);
+				System.out.print("\tEnter seat number: ");
+				String seats = in.readLine();
+			    while(Integer.parseInt(seats) < 1)
+			    {
+					System.out.print("\tInvalid seat number. Please enter seat number: ");
+					seats = in.readLine();
+				}
+				System.out.print("\tEnter flight duration: ");
+				String duration = in.readLine();
+				while(Integer.parseInt(duration) < 1)
+			    {
+					System.out.print("\tInvalid flight duration. Please enter flight duration: ");
+					duration = in.readLine();
+				}
+				System.out.print("\tEnter flight number: ");
+				String flightNum = in.readLine();
+				String queryLast = "INSERT INTO Flight (airId, flightNum, origin, destination, plane, seats, duration) VALUES (";
+				queryLast += "'" + airId + "', '" + flightNum + "', '" + origin + "', '" + destination + "', '" + plane +"', '" + seats +"', '" + duration +"');"; 
+				System.out.println("\tYour have successfully created a flight!"); 
+                esql.executeUpdate(queryLast);
+			}
+			else if(Integer.parseInt(choice) == 2)
+			{
+				System.out.print("\tEnter flight number: ");
+				String flightNum = in.readLine();
+				
+				String query = "SELECT * FROM Flight Where flightNum = '" +flightNum+ "';";
+				List<List<String>> query_result = esql.executeQueryAndReturnResult(query);
+				while(query_result.size() == 0)
+				{
+					System.out.print("\tNo flight found. Please enter a flight number. (Enter Exit to return to main menu) ");
+					flightNum = in.readLine();
+					if(flightNum.equals("Exit"))
+					{
+						return;
+					}
+					query = "SELECT * FROM Flight Where flightNum = '" +flightNum+ "';";
+					query_result = esql.executeQueryAndReturnResult(query);
+				}
+				//airId INTEGER NOT NULL,
+				//flightNum CHAR(8) NOT NULL,
+				//origin CHAR(16) NOT NULL,
+				//destination CHAR(16) NOT NULL,
+				//plane CHAR(16) NOT NULL,
+				//seats _SEATS NOT NULL,
+	//duration _HOURS NOT NULL,
+				String airId = query_result.get(0).get(0);
+				String origin = query_result.get(0).get(2);
+				String destination = query_result.get(0).get(3);
+				String plane = query_result.get(0).get(4);
+				String seats = query_result.get(0).get(5);
+				String duration = query_result.get(0).get(6);
+				esql.executeQueryAndPrintResult(query);
+				System.out.print("\tWould you like the update the origin? (Yes or No) ");
+				String newOrigin = in.readLine();
+				
+				while(!newOrigin.equals("Yes") && !newOrigin.equals("No"))
+				{
+					System.out.print("\tYou did not enter a valid response. Would you like the update the origin? (Yes or No or Exit to go to main menu) ");
+					newOrigin = in.readLine();
+					if(newOrigin.equals("Exit"))
+					{
+						return;
+					}
+				}
+				if(newOrigin.equals("Yes"))
+				{
+					System.out.print("\tPlease enter a new origin: ");
+					origin = in.readLine();
+				}
+				
+				System.out.print("\tWould you like the update the destination? (Yes or No) ");
+				String newDestination = in.readLine();
+				while(!newDestination.equals("Yes") && !newDestination.equals("No"))
+				{
+					System.out.print("\tYou did not enter a valid response. Would you like the update the destination? (Yes or No or Exit to go to main menu) ");
+					newDestination = in.readLine();
+					if(newDestination.equals("Exit"))
+					{
+						return;
+					}
+				}
+				if(newDestination.equals("Yes"))
+				{
+					System.out.print("\tPlease enter a new destination: ");
+					destination = in.readLine();
+				}
+				
+				System.out.print("\tWould you like the update the plane? (Yes or No) ");
+				String newPlane = in.readLine();
+				while(!newPlane.equals("Yes") && !newPlane.equals("No"))
+				{
+					System.out.print("\tYou did not enter a valid response. Would you like the update the plane? (Yes or No or Exit to go to main menu) ");
+					newPlane = in.readLine();
+					if(newPlane.equals("Exit"))
+					{
+						return;
+					}
+				}
+				if(newPlane.equals("Yes"))
+				{
+					System.out.print("\tPlease enter a new plane: ");
+					plane = in.readLine();
+				}
+				
+				System.out.print("\tWould you like the update the seat number? (Yes or No) ");
+				String newSeats = in.readLine();
+				while(!newSeats.equals("Yes") && !newSeats.equals("No"))
+				{
+					System.out.print("\tYou did not enter a valid response. Would you like the update the seat number? (Yes or No or Exit to go to main menu) ");
+					newSeats = in.readLine();
+					if(newSeats.equals("Exit"))
+					{
+						return;
+					}
+				}
+				if(newSeats.equals("Yes"))
+				{
+					System.out.print("\tPlease enter a new seat number: ");
+					seats = in.readLine();
+				}
+				
+				System.out.print("\tWould you like the update the duration? (Yes or No) ");
+				String newDuration = in.readLine();
+				while(!newDuration.equals("Yes") && !newDuration.equals("No"))
+				{
+					System.out.print("\tYou did not enter a valid response. Would you like the update the duration? (Yes or No or Exit to go to main menu) ");
+					newDuration = in.readLine();
+					if(newDuration.equals("Exit"))
+					{
+						return;
+					}
+				}
+				if(newDuration.equals("Yes"))
+				{
+					System.out.print("\tPlease enter a new duration: ");
+					duration = in.readLine();
+				}
+				
+				String queryLast = "UPDATE Flight SET origin = '" +origin+ "', destination = '" +destination+ "', plane = '" +plane+ "', seats = '" +seats+ "', duration ='" +duration+ "'Where flightNum = '" +flightNum+ "';";
+				System.out.println("\tYou have successfully updated the flight!"); 
+				//System.out.println(queryLast); 
+                esql.executeUpdate(queryLast);
+                esql.executeQueryAndPrintResult(query);
+			}
+		  }catch(Exception e){
+			 System.err.println (e.getMessage());
+		  }
 	}
 	
 	public static void ListAvailableFlightsBetweenOriginAndDestination(AirBooking esql) throws Exception{//5
@@ -803,7 +1005,6 @@ public class AirBooking{
 			 query += "';";
 			 
 			 List<List<String>> rcList = esql.executeQueryAndReturnResult(query);
-			 esql.executeQueryAndPrintResult(query);
 			 int rowcount = rcList.size();
 			 
 			 int seatsAvailable = numSeats - rowcount;
