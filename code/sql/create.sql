@@ -10,38 +10,10 @@ DROP DOMAIN IF EXISTS _HOURS CASCADE;
 DROP DOMAIN IF EXISTS _SEATS CASCADE;
 DROP DOMAIN IF EXISTS _SCORE CASCADE;
 
--- CREATE SEQUENCES
-CREATE SEQUENCE pID_seq START WITH 250; 
-CREATE SEQUENCE rID_seq START WITH 433;  
-CREATE SEQUENCE bookRef_seq START WITH 10000;
-CREATE SEQUENCE flightNum_seq START WITH 10000;
-
--- CREATE TRIGGERS
-CREATE LANGUAGE plpgsql; 
-CREATE OR REPLACE FUNCTION next_id()
-RETURNS "trigger" AS 
-	'BEGIN 
-	new.pID = nextval(''pID_seq''); 
-	Return new; 
-	END;'
-LANGUAGE 'plpgsql' VOLATILE; 
-
-CREATE LANGUAGE plpgsql; 
-CREATE OR REPLACE FUNCTION next_rid()
-RETURNS "trigger" AS 
-	'BEGIN 
-	new.rID = nextval(''rID_seq''); 
-	Return new; 
-	END;'
-LANGUAGE 'plpgsql' VOLATILE; 
-
-CREATE OR REPLACE FUNCTION next_bookRef()
-RETURNS "trigger" AS 
-	'BEGIN 
-	new.bookRef = nextval(''bookRef_seq''); 
-	Return new; 
-	END;'
-LANGUAGE 'plpgsql' VOLATILE; 
+DROP SEQUENCE IF EXISTS pID_seq; 
+DROP SEQUENCE IF EXISTS rID_seq; 
+DROP SEQUENCE IF EXISTS flightNum_seq; 
+DROP SEQUENCE IF EXISTS bookRef_seq; 
 
 -- CREATE INDICES 
 CREATE INDEX pIDi
@@ -178,4 +150,37 @@ FROM 'bookings.csv'
 WITH DELIMITER ',';
 --SELECT * FROM Booking;
 
+-- CREATE SEQUENCES
+CREATE SEQUENCE pID_seq; 
+SELECT setval('pID_seq', (SELECT MAX(pID)+1 FROM Passenger), false); 
+CREATE SEQUENCE rID_seq;  
+SELECT setval('rID_seq', (SELECT MAX(rID)+1 FROM Ratings), false); 
+CREATE SEQUENCE bookRef_seq START WITH 10000; 
+CREATE SEQUENCE flightNum_seq START WITH 10000;
 
+-- CREATE TRIGGERS
+CREATE LANGUAGE plpgsql; 
+CREATE OR REPLACE FUNCTION next_id()
+RETURNS "trigger" AS 
+	'BEGIN 
+	new.pID = nextval(''pID_seq''); 
+	Return new; 
+	END;'
+LANGUAGE 'plpgsql' VOLATILE; 
+
+CREATE LANGUAGE plpgsql; 
+CREATE OR REPLACE FUNCTION next_rid()
+RETURNS "trigger" AS 
+	'BEGIN 
+	new.rID = nextval(''rID_seq''); 
+	Return new; 
+	END;'
+LANGUAGE 'plpgsql' VOLATILE; 
+
+CREATE OR REPLACE FUNCTION next_bookRef()
+RETURNS "trigger" AS 
+	'BEGIN 
+	new.bookRef = nextval(''bookRef_seq''); 
+	Return new; 
+	END;'
+LANGUAGE 'plpgsql' VOLATILE; 
