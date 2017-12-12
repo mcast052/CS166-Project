@@ -870,13 +870,15 @@ public class AirBooking{
 	public static void ListHighestRatedRoutes(AirBooking esql){//7
 		//List the k highest rated Routes (i.e. Airline Name, flightNum, Avg_Score)
 		try{
-			 String query =  "Select origin, destination, AVG(SCORE) as Average_Score,F.flightNum From Ratings R, Flight F Where R.flightNum = F.flightNum Group By F.flightNum,r.rId Order By AVG(SCORE) DESC Limit ";
+			 String query =  "Select origin, destination, AVG(SCORE) as Average_Score,F.flightNum From Ratings R, Flight F Where R.flightNum = F.flightNum Group By F.flightNum Order By AVG(SCORE) DESC Limit ";
 			 System.out.print("\tEnter k: ");
 			 String input = in.readLine();
 			 query += input;
 			 query += ";";
 
+             //String query1 = "Select * From Ratings;";
 			 int rowCount = esql.executeQueryAndPrintResult(query);
+			 //int rowCount1 = esql.executeQueryAndPrintResult(query1);
 			 if(rowCount == 0)
 			 {
 				 System.out.println("\tThere are no reviews.");
