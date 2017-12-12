@@ -307,25 +307,65 @@ public class AirBooking{
 			esql.executeUpdate(trigger_query0); 
 			esql.executeUpdate(trigger_query); 
 			
-			System.out.print("\tEnter your full name: ");
-			String name = in.readLine(); 
-			System.out.print("\tEnter your birth date (mm/dd/yyyy) : "); 
-			String date = in.readLine(); 
-			System.out.print("\tEnter your passport number: ");
-			String passNum = in.readLine(); 
-			System.out.print("\tEnter the country you are from: "); 
-			String passCountry = in.readLine(); 
+			String fname, lname, name; 
+			do { 
+				System.out.print("\tEnter your first name: ");
+				fname = in.readLine(); 
+				if(fname.length() == 0) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				} 
+			} while (fname.length() == 0); 
+			do { 
+				System.out.print("\tEnter your last name: "); 
+				lname = in.readLine(); 
+				if(lname.length() == 0) {
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				} 
+			} while (lname.length() == 0); 
+			
+			name = fname + " " + lname; 
+			String date; 
+			do { 
+				System.out.print("\tEnter your birth date (mm/dd/yyyy) : "); 
+				date = in.readLine(); 
+				if(date.length() == 0 || (date.charAt(2) != '/' && date.charAt(5) != '/') ) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				}
+			} while (date.length() == 0); 
+			
+			String passNum; 
+			do { 
+				System.out.print("\tEnter your passport number: ");
+				passNum = in.readLine(); 
+				if(passNum.length() == 0 || passNum.length() > 10) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				}
+			} while (passNum.length() == 0 || passNum.length() > 10); 
+			
+			String passCountry; 
+			do { 
+				System.out.print("\tEnter the country you are from: "); 
+				passCountry = in.readLine(); 
+				if (passCountry.length() == 0) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				}
+			} while (passCountry.length() == 0); 
 			 
-			if(name != null && date != null && passNum != null && passCountry != null) { 
-				String query = "INSERT INTO Passenger (passNum, fullName, bdate, country) VALUES (";
-				query += "'" + passNum + "', '" + name + "', '" + date + "', '" + passCountry + "');"; 
-				//System.out.println(query); 
+			String query = "INSERT INTO Passenger (passNum, fullName, bdate, country) VALUES (";
+			query += "'" + passNum + "', '" + name + "', '" + date + "', '" + passCountry + "');"; 
+			//System.out.println(query); 
 
-				esql.executeUpdate(query); 
-			}
-			else { 
-				System.out.print("\tCannot leave entries blank.\n"); 
-			}
+			esql.executeUpdate(query); 
       }catch(Exception e){
          System.err.println (e.getMessage());
       }
@@ -553,23 +593,60 @@ public class AirBooking{
 	public static void TakeCustomerReview(AirBooking esql){//3
 		try {
 			//Gets initial information from user for queries
-			System.out.print("\tEnter your full name: "); 
-			String name = in.readLine(); 
-			System.out.print("\tEnter the flight number: "); 
-			String flightNum = in.readLine(); 
+			String name, flightNum; 
+			String passID = ""; 
+			boolean invalid = true; 
+			do { 
+				System.out.print("\tEnter your full name: "); 
+				name = in.readLine(); 
+				if (name.length() == 0) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				} 
+				else { 
+					//Query to find pID 
+					String query0 = "SELECT pID FROM Passenger WHERE fullName = '"; 
+					query0 += name + "';"; 
+					List<List<String>> query0_result = esql.executeQueryAndReturnResult(query0); 
+					if(query0_result.size() == 0) { 
+						System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+						String exit = in.readLine();
+						if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+					}
+					else { 
+						passID = query0_result.get(0).get(0); 
+						//System.out.print(passID);
+						invalid = false; 
+					} 
+				}
+			} while (invalid); 
 			
-			//Query to find pID 
-			String query0 = "SELECT pID FROM Passenger WHERE fullName = '"; 
-			query0 += name + "';"; 
-			List<List<String>> query0_result = esql.executeQueryAndReturnResult(query0); 
-			String passID = query0_result.get(0).get(0); 
-			System.out.print(passID); 
-			
-			//Query checks if passenger is in the booking table for that flight
-			String query1 = "SELECT * FROM Booking WHERE flightNum = "; 
-			query1 += "'" + flightNum + "' AND pID = '" + passID + "';";
-			System.out.print(query1); 
-			List<List<String>> query1_result = esql.executeQueryAndReturnResult(query1); 
+			invalid = true; 
+			do { 
+				System.out.print("\tEnter the flight number: "); 
+				flightNum = in.readLine(); 
+				if(flightNum.length() == 0) { 
+					System.out.print("\tInvalid entry. Try again or enter 1 to exit. ");
+					String exit = in.readLine();
+					if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+				} 
+				else {
+					//Query checks if passenger is in the booking table for that flight
+					String query1 = "SELECT * FROM Booking WHERE flightNum = "; 
+					query1 += "'" + flightNum + "' AND pID = '" + passID + "';";
+					//System.out.print(query1); 
+					List<List<String>> query1_result = esql.executeQueryAndReturnResult(query1); 
+					if(query1_result.size() == 0) { 
+						System.out.print("\tInvalid flight number. Passenger not found for this flight. Try again or enter 1 to exit. "); 
+						String exit = in.readLine(); 
+						if(exit.length() > 0 && Integer.parseInt(exit) == 1) { return; } 
+					}
+					else { 
+						invalid = false; 
+					} 
+				}
+			} while (invalid); 
 			
 			//If passenger exists, allow them to create a review
 			System.out.print("\tEnter your rating score 1-5, where 1 is poor and 5 is excellent: "); 
@@ -586,7 +663,7 @@ public class AirBooking{
 			//Insert customer review into the ratings table
 			String insert_query = "INSERT INTO Ratings (pID, flightNum, score, comment) VALUES ('"; 
 			insert_query += passID + "', '" + flightNum + "', '" + score + "', '" + comment + "');"; 
-			System.out.print(insert_query); 
+			//System.out.print(insert_query); 
 			esql.executeUpdate(insert_query);  
 		}
 		catch(Exception e) {
@@ -890,10 +967,49 @@ public class AirBooking{
 	public static void ListFlightFromOriginToDestinationInOrderOfDuration(AirBooking esql){//8
 		//List flight to destination in order of duration (i.e. Airline name, flightNum, origin, destination, duration, plane)
 		try { 
-			System.out.print("\tEnter the flight origin: "); 
-			String origin = in.readLine(); 
-			System.out.print("\tEnter the flight destination: "); 
-			String dest = in.readLine(); 
+			String origin, dest; 
+			boolean invalid = true; 
+			do { 
+				System.out.print("\tEnter the flight origin: "); 
+				origin = in.readLine(); 
+				if(origin.length() == 0) { 
+					System.out.print("\tCannot leave entry blank. Try again or enter 1 to exit. "); 
+					String exit = in.readLine(); 
+					if(exit.length() > 0 && Integer.parseInt(exit) == 0) { return; } 
+				} 
+				else { 
+					String origin_check = "SELECT * FROM Flight WHERE origin = '" + origin + "';"; 
+					List<List<String>> origin_res = esql.executeQueryAndReturnResult(origin_check); 
+					if(origin_res.size() == 0) { 
+						System.out.print("\tInvalid origin. Try again or enter 1 to exit. "); 
+						String exit = in.readLine(); 
+						if(exit.length() > 0 && Integer.parseInt(exit) == 0) { return; } 
+					} 
+					else { invalid = false; } 
+				}
+			} while (invalid);
+			
+			invalid = true; 
+			do { 
+				System.out.print("\tEnter the flight destination: "); 
+				dest = in.readLine(); 
+				if(dest.length() == 0) { 
+					System.out.print("\tCannot leave entry blank. Try again or enter 1 to exit. "); 
+					String exit = in.readLine(); 
+					if(exit.length() > 0 && Integer.parseInt(exit) == 0) { return; } 
+				} 
+				else { 
+					String dest_check = "SELECT * FROM Flight WHERE destination = '" + dest + "';"; 
+					List<List<String>> dest_res = esql.executeQueryAndReturnResult(dest_check); 
+					if(dest_res.size() == 0) { 
+						System.out.print("\tInvalid destination. Try again or enter 1 to exit. "); 
+						String exit = in.readLine(); 
+						if(exit.length() > 0 && Integer.parseInt(exit) == 0) { return; } 
+					} 
+					else { invalid = false; } 
+				} 
+			} while (invalid); 
+			
 			System.out.print("\tEnter the number of flights you would like to see: ");
 			int k = Integer.parseInt(in.readLine()); 
 			
